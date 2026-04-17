@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMG Performance Garage | Nairobi's German Car Specialists</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-surface: #111111;
+            --wire-color: #c8a84b;
+            --wire-dim: #3a2e14;
+            --accent: #e8c96e;
+            --text-primary: #f0ede6;
+            --text-muted: #6b6560;
+            --red-alert: #c0392b;
+            --font-heading: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, .heading {
+            font-family: var(--font-heading);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .section {
+            position: relative;
+            min-height: 100vh;
+            width: 100%;
+            padding: 80px 5%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Hero Section */
+        #hero {
+            height: 100vh;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 900px;
+        }
+
+        .overline {
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            margin-bottom: 20px;
+            line-height: 1.1;
+            font-weight: 900;
+        }
+
+        .hero-sub {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--wire-color);
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--wire-color);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--wire-color);
+        }
+
+        .btn-outline:hover {
+            background: rgba(200, 168, 75, 0.1);
+            color: var(--accent);
+        }
+
+        /* Services Grid */
+        #services {
+            background-color: var(--bg-surface);
+        }
+
+        .section-title {
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: 250px;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .service-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--wire-dim);
+            position: relative;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--wire-color);
+        }
+
+        .card-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .service-card:hover .card-canvas {
+            opacity: 0.8;
+        }
+
+        .service-card h3 {
+            position: relative;
+            z-index: 2;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .service-card p {
+            position: relative;
+            z-index: 2;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Grid Layout Adjustments */
+        .card-tall { grid-row: span 2; }
+        .card-wide { grid-column: span 3; }
+
+        /* Portfolio */
+        #portfolio {
+            padding: 80px 0;
+        }
+
+        .portfolio-track {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 40px 5%;
+            gap: 30px;
+            scrollbar-width: none;
+        }
+
+        .portfolio-track::-webkit-scrollbar { display: none; }
+
+        .portfolio-item {
+            flex: 0 0 400px;
+            scroll-snap-align: center;
+            background: var(--bg-surface);
+            border: 1px solid var(--wire-dim);
+            padding: 20px;
+        }
+
+        .portfolio-img {
+            width: 100%;
+            height: 250px;
+            background: #222;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: var(--bg-surface);
+            border-top: 1px solid var(--wire-dim);
+            border-bottom: 1px solid var(--wire-dim);
+            padding: 60px 5%;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            color: var(--accent);
+            font-weight: 900;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.8rem;
+        }
+
+        /* ECU Section */
+        .split-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 60px;
+        }
+
+        .ecu-content {
+            padding-right: 50px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .services-grid { grid-template-columns: repeat(2, 1fr); }
+            .card-wide { grid-column: span 2; }
+            .split-section { grid-template-columns: 1fr; }
+            .ecu-content { padding-right: 0; order: 1; }
+            .ecu-canvas-container { order: 2; height: 400px; }
+        }
+
+        @media (max-width: 768px) {
+            .services-grid { grid-template-columns: 1fr; }
+            .card-wide, .card-tall { grid-column: span 1; grid-row: span 1; }
+            .cta-group { flex-direction: column; }
+            .portfolio-item { flex: 0 0 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <section id="hero" class="section">
+        <div id="hero-canvas"></div>
+        <div class="hero-content">
+            <span class="overline">NAIROBI'S GERMAN CAR SPECIALISTS</span>
+            <h1>AMG PERFORMANCE GARAGE</h1>
+            <p class="hero-sub">Mercedes-Benz | Tuning | Restoration</p>
+            <div class="cta-group">
+                <a href="#contact" class="btn btn-primary">BOOK A SERVICE</a>
+                <a href="#portfolio" class="btn btn-outline">OUR WORK</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="section">
+        <div class="section-title">
+            <span class="overline">OUR EXPERTISE</span>
+            <h2>PRECISION SERVICES</h2>
+        </div>
+        <div class="services-grid">
+            <div class="service-card card-tall" data-service="engine">
+                <div class="card-canvas"></div>
+                <h3>Engine & Maintenance</h3>
+                <p>Specialized care for high-performance power units.</p>
+            </div>
+            <div class="service-card" data-service="ecu">
+                <div class="card-canvas"></div>
+                <h3>ECU Remapping</h3>
+                <p>Software optimization for peak output.</p>
+            </div>
+            <div class="service-card" data-service="nox">
+                <div class="card-canvas"></div>
+                <h3>Nox Delete</h3>
+                <p>Emission system solutions and tuning.</p>
+            </div>
+            <div class="service-card" data-service="exhaust">
+                <div class="card-canvas"></div>
+                <h3>Exhaust Upgrades</h3>
+                <p>Custom systems for sound and flow.</p>
+            </div>
+            <div class="service-card" data-service="body">
+                <div class="card-canvas"></div>
+                <h3>Bodywork & Facelift</h3>
+                <p>Modernizing aesthetics with precision.</p>
+            </div>
+            <div class="service-card card-wide" data-service="parts">
+                <div class="card-canvas"></div>
+                <h3>Genuine Parts Supply</h3>
+                <p>Directly imported OEM components for all German makes.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="section">
+        <div class="section-title">
+            <span class="overline">SHOWCASE</span>
+            <h2>RECENT PROJECTS</h2>
+        </div>
+        <div class="portfolio-track">
+            <div class="portfolio-item">
+                <div class="portfolio-img">W213 E200 — NOX DELETE + FACELIFT</div>
+                <h3>Mercedes-Benz E200</h3>
+                <p>Full system optimization and aesthetic upgrade.</p>
+            </div>
+            <div class="portfolio-item">
+                <div class="portfolio-img">W205 C63 — STAGE 2 REMAP</div>
+                <h3>Mercedes-AMG C63</h3>
+                <p>Performance tuning and exhaust modification.</p>
+            </div>
+            <div class="portfolio-item">
+                <div class="portfolio-img">GLE 450 — FULL SERVICE</div>
+                <h3>Mercedes-Benz GLE</h3>
+                <p>Comprehensive maintenance and genuine parts replacement.</p>
+            </div>
+            <div class="portfolio-item">
+                <div class="portfolio-img">VW ARTEON — ECU TUNING</div>
+                <h3>Volkswagen Arteon</h3>
+                <p>Software remap for improved throttle response.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            <span class="stat-number" data-target="12">0</span>
+            <span class="stat-label">Years Experience</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" data-target="500">0</span>
+            <span class="stat-label">Vehicles Serviced</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" data-target="4.3">0</span>
+            <span class="stat-label">Community Rating</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" data-target="100">0</span>
+            <span class="stat-label">Genuine OEM Parts</span>
+        </div>
+    </div>
+
+    <section id="ecu-feature" class="section">
+        <div class="split-section">
+            <div class="ecu-canvas-container" style="height: 500px; position: relative;">
+                <div id="ecu-engine-canvas" style="width: 100%; height: 100%;"></div>
+            </div>
+            <div class="ecu-content">
+                <span class="overline">PERFORMANCE TUNING</span>
+                <h2>ECU REMAPPING</h2>
+                <p style="margin: 20px 0; color: var(--text-muted);">Unlock the full potential of your AMG engine. Our precision remapping services optimize fuel delivery, ignition timing, and boost pressure to deliver significant gains in horsepower and torque while maintaining factory reliability.</p>
+                <a href="#contact" class="btn btn-primary">ENQUIRE NOW →</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="parts-supply" class="section" style="background: linear-gradient(135deg, var(--bg-primary) 50%, var(--bg-surface) 50%);">
+        <div class="split-section">
+            <div class="parts-content">
+                <span class="overline">GENUINE COMPONENTS</span>
+                <h2>PARTS SUPPLY</h2>
+                <ul style="list-style: none; margin: 30px 0; color: var(--text-muted);">
+                    <li style="margin-bottom: 15px; border-left: 2px solid var(--wire-color); padding-left: 15px;">BRAKE SYSTEMS & CALIPERS</li>
+                    <li style="margin-bottom: 15px; border-left: 2px solid var(--wire-color); padding-left: 15px;">EXHAUST COMPONENTS</li>
+                    <li style="margin-bottom: 15px; border-left: 2px solid var(--wire-color); padding-left: 15px;">ENGINE INTERNALS</li>
+                    <li style="margin-bottom: 15px; border-left: 2px solid var(--wire-color); padding-left: 15px;">BODY KITS & FACELIFTS</li>
+                </ul>
+                <p>Affiliated with <strong>AMG Performance Spares Kenya</strong></p>
+            </div>
+            <div class="parts-canvas-container" style="height: 500px; position: relative;">
+                <div id="parts-brake-canvas" style="width: 100%; height: 100%;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="section">
+        <div class="section-title">
+            <span class="overline">GET IN TOUCH</span>
+            <h2>BOOK YOUR SERVICE</h2>
+        </div>
+        <div class="split-section">
+            <div class="contact-info">
+                <h3 style="margin-bottom: 20px;">Contact Details</h3>
+                <p style="margin-bottom: 10px;">📍 Dundori Road, Industrial Area, Nairobi</p>
+                <p style="margin-bottom: 30px;">📞 +254 722 744 078</p>
+                <a href="https://wa.me/254722744078" class="btn btn-outline" style="display: inline-block; margin-bottom: 40px;">WHATSAPP US</a>
+                <div class="socials">
+                    <p>Follow us: @amg_performance_garage</p>
+                </div>
+            </div>
+            <div class="contact-form">
+                <form style="display: grid; gap: 15px;">
+                    <input type="text" placeholder="NAME" style="padding: 15px; background: var(--bg-surface); border: 1px solid var(--wire-dim); color: white;">
+                    <input type="text" placeholder="PHONE / WHATSAPP" style="padding: 15px; background: var(--bg-surface); border: 1px solid var(--wire-dim); color: white;">
+                    <input type="text" placeholder="VEHICLE MODEL" style="padding: 15px; background: var(--bg-surface); border: 1px solid var(--wire-dim); color: white;">
+                    <textarea placeholder="SERVICE NEEDED" rows="4" style="padding: 15px; background: var(--bg-surface); border: 1px solid var(--wire-dim); color: white;"></textarea>
+                    <button type="submit" class="btn btn-primary">SEND MESSAGE</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer style="padding: 40px 5%; text-align: center; border-top: 1px solid var(--wire-dim); color: var(--text-muted); font-size: 0.8rem;">
+        © 2026 AMG Performance Garage Ltd — All Rights Reserved
+    </footer>
+
+    <script>
+        // GSAP Registration
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Initializing Three.js logic will go here in next phases
+    </script>
+</body>
+</html>
+
+    <script>
+        // --- UTILS ---
+        const colors = {
+            wire: 0xc8a84b,
+            wireDim: 0x3a2e14,
+            bg: 0x0a0a0a,
+            accent: 0xe8c96e
+        };
+
+        // --- HERO THREE.JS ---
+        function initHero() {
+            const container = document.getElementById('hero-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Create a procedural car-like mesh (simplified)
+            const carGroup = new THREE.Group();
+            
+            // Body
+            const bodyGeom = new THREE.BoxGeometry(4, 1, 2);
+            const bodyWire = new THREE.WireframeGeometry(bodyGeom);
+            const bodyLine = new THREE.LineSegments(bodyWire);
+            bodyLine.material.color.setHex(colors.wire);
+            bodyLine.material.transparent = true;
+            bodyLine.material.opacity = 0;
+            carGroup.add(bodyLine);
+
+            // Cabin
+            const cabinGeom = new THREE.BoxGeometry(2, 0.8, 1.8);
+            cabinGeom.translate(0, 0.8, 0);
+            const cabinWire = new THREE.WireframeGeometry(cabinGeom);
+            const cabinLine = new THREE.LineSegments(cabinWire);
+            cabinLine.material.color.setHex(colors.wire);
+            cabinLine.material.transparent = true;
+            cabinLine.material.opacity = 0;
+            carGroup.add(cabinLine);
+
+            // Wheels
+            const wheelGeom = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 12);
+            wheelGeom.rotateZ(Math.PI / 2);
+            const wheelPositions = [
+                [-1.5, -0.5, 1], [1.5, -0.5, 1],
+                [-1.5, -0.5, -1], [1.5, -0.5, -1]
+            ];
+
+            wheelPositions.forEach(pos => {
+                const wWire = new THREE.WireframeGeometry(wheelGeom);
+                const wLine = new THREE.LineSegments(wWire);
+                wLine.position.set(...pos);
+                wLine.material.color.setHex(colors.wire);
+                wLine.material.transparent = true;
+                wLine.material.opacity = 0;
+                carGroup.add(wLine);
+            });
+
+            scene.add(carGroup);
+            camera.position.z = 7;
+            camera.position.y = 1;
+
+            // Animation: Assemble from particles (simulated with opacity and scale)
+            carGroup.scale.set(0.1, 0.1, 0.1);
+            gsap.to(carGroup.scale, { x: 1, y: 1, z: 1, duration: 2.4, ease: "power2.out" });
+            carGroup.children.forEach(child => {
+                gsap.to(child.material, { opacity: 1, duration: 2, delay: 0.4 });
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                carGroup.rotation.y += 0.005;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // GSAP Scroll Trigger for Hero
+            gsap.to(carGroup.position, {
+                x: 20,
+                z: -10,
+                scrollTrigger: {
+                    trigger: "#hero",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 1
+                }
+            });
+
+            gsap.to(".hero-content", {
+                opacity: 0,
+                y: -100,
+                scrollTrigger: {
+                    trigger: "#hero",
+                    start: "top top",
+                    end: "50% top",
+                    scrub: true
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+
+        // --- PERFORMANCE UTILS ---
+        function createObserver(callback) {
+            return new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    callback(entry.isIntersecting);
+                });
+            }, { threshold: 0.1 });
+        }
+
+        // --- SERVICES THREE.JS ---
+        function initServices() {
+            const cards = document.querySelectorAll('.service-card');
+            
+            cards.forEach(card => {
+                const container = card.querySelector('.card-canvas');
+                const type = card.dataset.service;
+                
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                container.appendChild(renderer.domElement);
+
+                let mesh;
+                const material = new THREE.LineBasicMaterial({ color: colors.wireDim, transparent: true, opacity: 0.6 });
+
+                switch(type) {
+                    case 'engine':
+                        const engineGeom = new THREE.BoxGeometry(1, 1.5, 1);
+                        mesh = new THREE.LineSegments(new THREE.WireframeGeometry(engineGeom), material);
+                        break;
+                    case 'ecu':
+                        const ecuGeom = new THREE.PlaneGeometry(1.5, 1);
+                        mesh = new THREE.LineSegments(new THREE.WireframeGeometry(ecuGeom), material);
+                        break;
+                    case 'nox':
+                        const noxGeom = new THREE.TorusGeometry(0.5, 0.2, 8, 24);
+                        mesh = new THREE.LineSegments(new THREE.WireframeGeometry(noxGeom), material);
+                        break;
+                    case 'exhaust':
+                        const exGeom = new THREE.CylinderGeometry(0.3, 0.3, 2, 12);
+                        exGeom.rotateX(Math.PI / 2);
+                        mesh = new THREE.LineSegments(new THREE.WireframeGeometry(exGeom), material);
+                        break;
+                    case 'body':
+                        const bodyGeom = new THREE.CapsuleGeometry(0.5, 1, 4, 8);
+                        mesh = new THREE.LineSegments(new THREE.WireframeGeometry(bodyGeom), material);
+                        break;
+                    case 'parts':
+                        const partGeom = new THREE.IcosahedronGeometry(1, 1);
+                        mesh = new THREE.LineSegments(new THREE.WireframeGeometry(partGeom), material);
+                        break;
+                }
+
+                if (mesh) {
+                    scene.add(mesh);
+                    camera.position.z = 3;
+
+                    card.addEventListener('mouseenter', () => {
+                        gsap.to(material.color, { r: 0.78, g: 0.66, b: 0.29, duration: 0.3 }); // colors.wire
+                        gsap.to(material, { opacity: 1, duration: 0.3 });
+                    });
+
+                    card.addEventListener('mouseleave', () => {
+                        gsap.to(material.color, { r: 0.23, g: 0.18, b: 0.08, duration: 0.3 }); // colors.wireDim
+                        gsap.to(material, { opacity: 0.6, duration: 0.3 });
+                    });
+
+                    let isVisible = false;
+                    const observer = createObserver((visible) => isVisible = visible);
+                    observer.observe(container);
+
+                    function animate() {
+                        requestAnimationFrame(animate);
+                        if (!isVisible) return;
+                        mesh.rotation.y += 0.01;
+                        mesh.rotation.x += 0.005;
+                        renderer.render(scene, camera);
+                    }
+                    animate();
+                }
+            });
+        }
+
+        // --- STATS COUNTER ---
+        function initStats() {
+            const stats = document.querySelectorAll('.stat-number');
+            stats.forEach(stat => {
+                const target = parseFloat(stat.dataset.target);
+                const obj = { value: 0 };
+                gsap.to(obj, {
+                    value: target,
+                    duration: 2,
+                    scrollTrigger: {
+                        trigger: stat,
+                        start: "top 90%",
+                    },
+                    onUpdate: () => {
+                        stat.innerText = target % 1 === 0 ? Math.floor(obj.value) : obj.value.toFixed(1);
+                    }
+                });
+            });
+        }
+
+        // --- ECU FEATURE THREE.JS ---
+        function initECU() {
+            const container = document.getElementById('ecu-engine-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            const engineGroup = new THREE.Group();
+            
+            // Block
+            const blockGeom = new THREE.BoxGeometry(2, 1, 1);
+            const block = new THREE.LineSegments(new THREE.WireframeGeometry(blockGeom), new THREE.LineBasicMaterial({ color: colors.wireDim }));
+            engineGroup.add(block);
+
+            // Pistons
+            const pistons = [];
+            for(let i = 0; i < 4; i++) {
+                const pGeom = new THREE.CylinderGeometry(0.2, 0.2, 0.5, 8);
+                const p = new THREE.LineSegments(new THREE.WireframeGeometry(pGeom), new THREE.LineBasicMaterial({ color: colors.wire }));
+                p.position.x = (i - 1.5) * 0.5;
+                p.position.y = 0.5;
+                engineGroup.add(p);
+                pistons.push(p);
+            }
+
+            scene.add(engineGroup);
+            camera.position.z = 3;
+            camera.position.y = 1;
+            camera.lookAt(0,0,0);
+
+            let speed = 0.05;
+            function animate() {
+                requestAnimationFrame(animate);
+                const time = Date.now() * 0.005;
+                pistons.forEach((p, i) => {
+                    p.position.y = 0.5 + Math.sin(time + i) * 0.3;
+                });
+                engineGroup.rotation.y += 0.002;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Scroll trigger to speed up pistons
+            ScrollTrigger.create({
+                trigger: "#ecu-feature",
+                start: "top bottom",
+                end: "bottom top",
+                onUpdate: (self) => {
+                    speed = 0.05 + self.progress * 0.2;
+                }
+            });
+        }
+
+        // --- PARTS BRAKE THREE.JS ---
+        function initParts() {
+            const container = document.getElementById('parts-brake-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            const brakeGroup = new THREE.Group();
+            
+            // Disc
+            const discGeom = new THREE.CylinderGeometry(1.2, 1.2, 0.1, 32);
+            discGeom.rotateX(Math.PI / 2);
+            const disc = new THREE.LineSegments(new THREE.WireframeGeometry(discGeom), new THREE.LineBasicMaterial({ color: colors.wireDim }));
+            brakeGroup.add(disc);
+
+            // Caliper
+            const calGeom = new THREE.BoxGeometry(0.4, 0.8, 0.3);
+            const caliper = new THREE.LineSegments(new THREE.WireframeGeometry(calGeom), new THREE.LineBasicMaterial({ color: colors.wire }));
+            caliper.position.set(1, 0, 0.1);
+            brakeGroup.add(caliper);
+
+            scene.add(brakeGroup);
+            camera.position.z = 3;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                disc.rotation.z += 0.02;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initHero();
+            initServices();
+            initStats();
+            initECU();
+            initParts();
+        });
+    </script>
